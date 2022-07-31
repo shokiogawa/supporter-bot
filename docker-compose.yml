@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+      - ./src:/go/household/src
+    ports:
+      - 8080:80
+    # environment:
+    #   - MYSQL_HOST_NAME=db
+    env_file: .env
+#    depends_on:
+#      - db
+#  db:
+#    platform: linux/x86_64
+#    image: mysql:5.7
+#    env_file:
+#      - .env
+#    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+#    ports:
+#      - 3306:3306
+#    volumes:
+#      - ./mysql/data:/var/lib/mysql
+#      - ./mysql/init:/docker-entrypoint-initdb.d
