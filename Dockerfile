@@ -6,7 +6,8 @@ RUN apk update && apk --no-cache add git
 RUN go mod tidy && go install github.com/cosmtrek/air@v1.29.0
 WORKDIR /go/household/src
 CMD ["air", "-c", ".air.toml"]
-EXPOSE 80
+ENV PORT=${PORT}
+#EXPOSE 80
 
 # #builder
 # FROM golang:1.16.4-alpine as builder
