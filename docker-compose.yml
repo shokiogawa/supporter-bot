@@ -4,14 +4,12 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Docker/Dockerfile.develop
     tty: true
     volumes:
       - ./src:/go/household/src
     ports:
       - 8080:80
-    # environment:
-    #   - MYSQL_HOST_NAME=db
     env_file: .env
 #    depends_on:
 #      - db

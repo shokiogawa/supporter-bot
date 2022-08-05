@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-	//err := godotenv.Load("../.env")
 	fmt.Println("Hellow world")
 	init, err := NewInitialize()
 	if err != nil {
@@ -14,7 +13,12 @@ func main() {
 	}
 	//ルーターセッテイング
 	e := NewRouter(init)
+
+	env := os.Getenv("ENV")
+	if env == "Develop" {
+		e.Logger.Fatal(e.Start(":80"))
+	} else {
+		e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
+	}
 	//起動
-	//e.Logger.Fatal(e.Start(":80"))
-	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 }
