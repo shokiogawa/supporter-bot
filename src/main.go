@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
 func main() {
-	fmt.Println("Hellow world")
 	init, err := NewInitialize()
 	if err != nil {
 		return
@@ -20,5 +18,4 @@ func main() {
 	} else {
 		e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 	}
-	//起動
 }
