@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
-#          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_api_key: 'fc8ddf63-0209-4101-be9c-696603647ad3'
           heroku_app_name: 'support-life-bot'
-          heroku_email: "shouki2578@gmail.com"
+          heroku_email: 'shouki2578@gmail.com'
           stack: "container"
