@@ -14,5 +14,5 @@ func NewRouter(init *Initialize) (e *echo.Echo) {
 }
 
 func check(c echo.Context) error {
-	return c.String(200, "Hello world develop to master")
+	return c.String(200, "Hello world pro")
 }
