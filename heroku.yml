@@ -3,4 +3,4 @@ setup:
     ENV: Production
 build:
   docker:
-    web: Dockerfile
+    web: Docker/Dockerfile
