@@ -16,13 +16,27 @@ func NewCostRepository(database *infrastructure.Database) *CostRepository {
 	return cost
 }
 
+type ReceiveUserId struct {
+	Id int `db:"id"`
+}
+
 func (repo *CostRepository) Save(cost *entity.Cost) (err error) {
 	db, err := repo.database.Connect()
 	if err != nil {
 		return
 	}
-	query := `INSERT INTO costs (public_cost_id, user_id, title, outcome)`
-	result := db.MustExec(query, cost.PublicFixedCostId, cost.UserId, cost.Title, cost.OutCome)
+
+	//line_user_idより、user_idを取得
+	query := `SELECT id FROM users WHERE line_user_id = ?`
+	var receiveVar ReceiveUserId
+	err = db.Get(&receiveVar, query, cost.UserLineId)
+	if err != nil {
+		return
+	}
+	userId := uint32(receiveVar.Id)
+
+	query = `INSERT INTO costs (public_cost_id, user_id, title, outcome) VALUE (?,?,?,?)`
+	result := db.MustExec(query, cost.PublicCostId, userId, cost.Title, cost.OutCome)
 	resultNum, err := result.RowsAffected()
 	if resultNum == 0 {
 		fmt.Println("nothing affected")

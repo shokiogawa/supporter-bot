@@ -25,9 +25,15 @@ func NewInitialize() (init *Initialize, err error) {
 	//Handler関連
 	database, err := infrastructure.NewDatabase()
 	costRepository := repository_imp.NewCostRepository(database)
+	userRepository := repository_imp.NewUserRepository(database)
+
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
+	saveUserUseCase := command.NewSaveUserUseCase(userRepository)
+
 	costController := controller.NewCostController(*saveCostUsecase)
-	handler, err := line.NewLineHandler(lineBot, *costController, *weatherController)
+	userController := controller.NewUserController(*saveUserUseCase)
+
+	handler, err := line.NewLineHandler(lineBot, costController, weatherController, userController)
 
 	if err != nil {
 		return

@@ -16,13 +16,16 @@ func NewSaveCostUseCase(costRepository repository_interface.CostRepository) *Sav
 	return usecase
 }
 
-func (usecase *SaveCostUseCase) Invoke(title string, outcome int, userId string) (err error) {
-	fmt.Println(userId)
-	cost, err := entity.NewCost(title, outcome, userId)
+func (usecase *SaveCostUseCase) Invoke(title string, outcome int, userLineId string) (err error) {
+	cost, err := entity.NewCost(title, outcome, userLineId)
 	if err != nil {
 		return
 	}
+	err = usecase.costRepository.Save(cost)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	//データを保存する。
-	fmt.Println(cost)
 	return err
 }

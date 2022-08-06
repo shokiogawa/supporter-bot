@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 )
 
 func main() {
+	fmt.Println("go app running...")
 	init, err := NewInitialize()
 	if err != nil {
 		return
