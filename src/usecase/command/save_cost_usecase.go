@@ -17,6 +17,7 @@ func NewSaveCostUseCase(costRepository repository_interface.CostRepository) *Sav
 }
 
 func (usecase *SaveCostUseCase) Invoke(title string, outcome int, userId string) (err error) {
+	fmt.Println(userId)
 	cost, err := entity.NewCost(title, outcome, userId)
 	if err != nil {
 		return

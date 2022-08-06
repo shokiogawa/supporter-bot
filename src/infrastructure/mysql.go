@@ -13,15 +13,14 @@ type Database struct {
 
 func NewDatabase() (db *Database, err error) {
 	db = new(Database)
-	db.DB, err = Connect()
+	db.DB, err = tryConnect()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	return
 }
-
-func Connect() (db *sqlx.DB, err error) {
+func tryConnect() (db *sqlx.DB, err error) {
 	var dsn string
 	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST_NAME"), os.Getenv("MYSQL_DATABASE"))
 	db, err = sqlx.Connect("mysql", dsn)
@@ -29,4 +28,17 @@ func Connect() (db *sqlx.DB, err error) {
 		return
 	}
 	return
+}
+
+func (mysql *Database) Connect() (db *sqlx.DB, err error) {
+	err = mysql.DB.Ping()
+	if err != nil {
+		// リトライ処理
+		db, connerr := tryConnect()
+		if connerr != nil {
+			return nil, connerr
+		}
+		mysql.DB = db
+	}
+	return mysql.DB, nil
 }
