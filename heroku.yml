@@ -4,8 +4,3 @@ setup:
 build:
   docker:
     web: Dockerfile
-    worker: Docker/Dockerfile.develop
-release:
-  image: worker
-  command:
-    sql-migrate up
