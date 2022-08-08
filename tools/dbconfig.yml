@@ -1,0 +1,11 @@
+development:
+  dialect: mysql
+  dir: migrations
+  table: migrations
+  datasource: user:secret@tcp(127.0.0.1)/mysql?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true
+
+seed:
+  dialect: mysql
+  dir: seeds/dummy
+  table: seeds
+  datasource: user:secret@tcp(127.0.0.1)/mysql?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true
