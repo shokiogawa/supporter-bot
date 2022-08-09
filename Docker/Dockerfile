@@ -1,12 +1,12 @@
-FROM golang:1.18.4-alpine
-WORKDIR /go/household/
-COPY src ./src
-COPY go.mod go.sum ./
-RUN apk update && apk --no-cache add git
-RUN go mod tidy && go install github.com/cosmtrek/air@v1.29.0
-WORKDIR /go/household/src
-CMD ["go", "run", "main.go"]
-EXPOSE 80
+#FROM golang:1.18.4-alpine
+#WORKDIR /go/household/
+#COPY src ./src
+#COPY go.mod go.sum ./
+#RUN apk update && apk --no-cache add git
+#RUN go mod tidy && go install github.com/cosmtrek/air@v1.29.0
+#WORKDIR /go/household/src
+#CMD ["go", "run", "main.go"]
+#EXPOSE 80
 
 #FROM golang:1.18.4-alpine
 #WORKDIR /go/household/
