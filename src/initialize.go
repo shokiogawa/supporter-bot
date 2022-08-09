@@ -27,10 +27,12 @@ func NewInitialize() (init *Initialize, err error) {
 	costRepository := repository_imp.NewCostRepository(database)
 	userRepository := repository_imp.NewUserRepository(database)
 
+	costQueryService := query_service_imp.NewCostQueryService(database)
+
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
 	saveUserUseCase := command.NewSaveUserUseCase(userRepository)
 
-	costController := controller.NewCostController(*saveCostUsecase)
+	costController := controller.NewCostController(*saveCostUsecase, costQueryService)
 	userController := controller.NewUserController(*saveUserUseCase)
 
 	handler, err := line.NewLineHandler(lineBot, costController, weatherController, userController)
