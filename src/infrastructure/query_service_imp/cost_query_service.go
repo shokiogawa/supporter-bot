@@ -26,7 +26,35 @@ type ReceiveCost struct {
 	OutCome int    `db:"outcome"`
 }
 
-func (qs *CostQueryService) FetchList(lineUserId string) (listCost []entity.Cost, err error) {
+type ReceiveSumCost struct {
+	OutCome int `db:"SUM(outcome)"`
+}
+
+func (qs *CostQueryService) FetchPerMonth(lineUserId string) (costSum int, err error) {
+	db, err := qs.database.Connect()
+	if err != nil {
+		return
+	}
+	query := `SELECT id FROM users WHERE line_user_id = ?`
+	var receiceUserIdVar ReceiveUserId
+	err = db.Get(&receiceUserIdVar, query, lineUserId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	today := time.Now()
+	query = `SELECT SUM(outcome) FROM costs WHERE user_id = ? AND DATE_FORMAT(created_at, '%Y%m') = DATE_FORMAT(?, '%Y%m') GROUP BY DATE_FORMAT(created_at, '%Y%m')`
+	var receiveSumCost ReceiveSumCost
+	err = db.Get(&receiveSumCost, query, receiceUserIdVar.Id, today)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	costSum = receiveSumCost.OutCome
+	return
+}
+
+func (qs *CostQueryService) FetchPerDay(lineUserId string) (listCost []entity.Cost, err error) {
 	db, err := qs.database.Connect()
 	if err != nil {
 		return
