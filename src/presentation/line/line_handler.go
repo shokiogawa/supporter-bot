@@ -51,9 +51,13 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 				} else if strings.Contains(receiveText, "ユーザー登録") {
 					replyMessage, err = handler.userController.SaveUser(event.Source.UserID)
 				} else if strings.Contains(receiveText, "今日の支出") {
-					replyMessage, err = handler.costController.ListCost(event.Source.UserID)
-				} else {
+					replyMessage, err = handler.costController.CostPerDay(event.Source.UserID)
+				} else if strings.Contains(receiveText, "今月の支出") {
+					replyMessage, err = handler.costController.CostPerMonth(event.Source.UserID)
+				} else if strings.Contains(receiveText, ":") {
 					replyMessage, err = handler.costController.SaveCost(message.Text, event.Source.UserID)
+				} else {
+					replyMessage = receiveText
 				}
 			}
 		}
