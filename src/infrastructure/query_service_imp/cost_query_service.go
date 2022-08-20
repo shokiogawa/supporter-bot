@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"household.api/src/domain/entity"
 	"household.api/src/infrastructure"
+	"household.api/src/usecase/query/read_model"
 	"time"
 )
 
@@ -27,10 +28,11 @@ type ReceiveCost struct {
 }
 
 type ReceiveSumCost struct {
-	OutCome int `db:"SUM(outcome)"`
+	OutCome int    `db:"SUM(outcome)"`
+	Date    string `db:"date"`
 }
 
-func (qs *CostQueryService) FetchPerMonth(lineUserId string) (costSum int, err error) {
+func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_model.CostSumMonthReadModel, err error) {
 	db, err := qs.database.Connect()
 	if err != nil {
 		return
@@ -43,14 +45,19 @@ func (qs *CostQueryService) FetchPerMonth(lineUserId string) (costSum int, err e
 		return
 	}
 	today := time.Now()
-	query = `SELECT SUM(outcome) FROM costs WHERE user_id = ? AND DATE_FORMAT(created_at, '%Y%m') = DATE_FORMAT(?, '%Y%m') GROUP BY DATE_FORMAT(created_at, '%Y%m')`
-	var receiveSumCost ReceiveSumCost
-	err = db.Get(&receiveSumCost, query, receiceUserIdVar.Id, today)
+	query = `SELECT SUM(outcome),DATE_FORMAT(created_at, '%Y年%m月%d日') as date FROM costs WHERE user_id = ? AND DATE_FORMAT(created_at, '%Y%m') = DATE_FORMAT(?, '%Y%m') GROUP BY DATE_FORMAT(created_at, '%Y年%m月%d日')`
+	var receiveSumCosts []ReceiveSumCost
+	err = db.Select(&receiveSumCosts, query, receiceUserIdVar.Id, today)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	costSum = receiveSumCost.OutCome
+	for _, cost := range receiveSumCosts {
+		readModel = append(readModel, read_model.CostSumMonthReadModel{
+			OutCome: cost.OutCome,
+			Date:    cost.Date,
+		})
+	}
 	return
 }
 
