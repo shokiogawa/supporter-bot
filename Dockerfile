@@ -12,7 +12,7 @@ RUN CGO_ENABLE=0 GOOS=linux go build -o /go/household/binary
 #production
 FROM alpine as production
 WORKDIR go/household/production
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates && apk add curl
 COPY --from=builder /go/household/binary /go/household/production
 ENV PORT=${PORT}
 CMD ["/go/household/production/binary"]

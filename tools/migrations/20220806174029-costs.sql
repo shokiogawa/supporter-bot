@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS costs(
     update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
     );
+ALTER TABLE costs ADD INDEX index1(user_id);
 -- +migrate Down
 
 DROP TABLE IF EXISTS costs;
