@@ -5,23 +5,26 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"household.api/src/presentation/line/controller"
+	"strconv"
 	"strings"
 )
 
 //LineHandler ルーターのような役割(どのコントローラーを使用するもの)
 type LineHandler struct {
-	bot               *linebot.Client
-	costController    *controller.CostController
-	userController    *controller.UserController
-	weatherController *controller.WeatherController
+	bot                  *linebot.Client
+	costController       *controller.CostController
+	userController       *controller.UserController
+	weatherController    *controller.WeatherController
+	restaurantController *controller.RestaurantController
 }
 
-func NewLineHandler(bot *linebot.Client, costController *controller.CostController, weatherController *controller.WeatherController, userController *controller.UserController) (lineHandler *LineHandler, err error) {
+func NewLineHandler(bot *linebot.Client, costController *controller.CostController, weatherController *controller.WeatherController, userController *controller.UserController, restaurantController *controller.RestaurantController) (lineHandler *LineHandler, err error) {
 	lineHandler = new(LineHandler)
 	lineHandler.bot = bot
 	lineHandler.costController = costController
 	lineHandler.weatherController = weatherController
 	lineHandler.userController = userController
+	lineHandler.restaurantController = restaurantController
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -59,16 +62,39 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 				} else {
 					replyMessage = receiveText
 				}
+				//ここもどうにかわかりやすいように変更予定
+				_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+				if err != nil {
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do()
+					if err != nil {
+						fmt.Println(err)
+					}
+				}
+			case *linebot.LocationMessage:
+				msg := event.Message.(*linebot.LocationMessage)
+				lat := strconv.FormatFloat(msg.Latitude, 'f', 2, 64)
+				lng := strconv.FormatFloat(msg.Longitude, 'f', 2, 64)
+				restaurants, err := handler.restaurantController.GetRestaurant(lat, lng)
+				if err != nil {
+					fmt.Println(err)
+				}
+				var ccs []*linebot.CarouselColumn
+				for _, rest := range restaurants {
+					fmt.Println(rest)
+					cc := linebot.NewCarouselColumn(rest.Photo, rest.Name, rest.Address, linebot.NewURIAction("ホットペッパーで開く", rest.URL)).WithImageOptions("#FFFFFF")
+					ccs = append(ccs, cc)
+				}
+				res := linebot.NewTemplateMessage(
+					"レストラン一覧",
+					linebot.NewCarouselTemplate(ccs...).WithImageOptions("rectangle", "cover"),
+				)
+				if _, err := handler.bot.ReplyMessage(event.ReplyToken, res).Do(); err != nil {
+					fmt.Println("ここ")
+					fmt.Println(err)
+				}
 			}
 		}
-		//ここもどうにかわかりやすいように変更予定
-		_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
-		if err != nil {
-			_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do()
-			if err != nil {
-				fmt.Println(err)
-			}
-		}
+
 	}
 	return
 }
