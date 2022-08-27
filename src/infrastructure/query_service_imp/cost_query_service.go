@@ -45,9 +45,11 @@ func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_m
 		return
 	}
 	today := time.Now()
-	query = `SELECT SUM(outcome),DATE_FORMAT(created_at, '%Y年%m月%d日') as date FROM costs WHERE user_id = ? AND DATE_FORMAT(created_at, '%Y%m') = DATE_FORMAT(?, '%Y%m') GROUP BY DATE_FORMAT(created_at, '%Y年%m月%d日')`
+	firstDate := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, time.Local)
+	lastDate := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, -1)
+	query = `SELECT SUM(outcome),DATE_FORMAT(created_at, '%Y年%m月%d日') as date FROM costs WHERE user_id = ? AND created_at BETWEEN ? AND ? GROUP BY DATE_FORMAT(created_at, '%Y年%m月%d日');`
 	var receiveSumCosts []ReceiveSumCost
-	err = db.Select(&receiveSumCosts, query, receiceUserIdVar.Id, today)
+	err = db.Select(&receiveSumCosts, query, receiceUserIdVar.Id, firstDate, lastDate)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -75,9 +77,12 @@ func (qs *CostQueryService) FetchPerDay(lineUserId string) (listCost []entity.Co
 	}
 
 	today := time.Now()
-	query = `SELECT title, outcome FROM costs WHERE user_id = ? AND DATE_FORMAT(created_at, '%Y-%m-%d') = DATE_FORMAT(?, '%Y-%m-%d')`
+	firstDateTime := time.Date(today.Year(), today.Month(), today.Day(), 00, 00, 00, 00, time.Local)
+	lastDateTime := time.Date(today.Year(), today.Month(), today.Day(), 23, 59, 59, 00, time.Local)
+
+	query = `SELECT title, outcome FROM costs WHERE user_id = ? AND created_at BETWEEN ? AND ?`
 	var receiveVars []ReceiveCost
-	err = db.Select(&receiveVars, query, receiceUserIdVar.Id, today)
+	err = db.Select(&receiveVars, query, receiceUserIdVar.Id, firstDateTime, lastDateTime)
 	if err != nil {
 		fmt.Println(err)
 		return
