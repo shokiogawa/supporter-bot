@@ -10,6 +10,8 @@ func NewRouter(init *Initialize) (e *echo.Echo) {
 	e.POST("/callback", init.lineHandler.EventHandler)
 	// batch.weather.Getみたいにしたい
 	e.POST("/weather", init.lineBatch.GetWeather)
+	// ユーザー全員に今月分の支出を送信する。
+	e.GET("costs", init.lineBatch.GetOutComePerMonth)
 	return e
 }
 
