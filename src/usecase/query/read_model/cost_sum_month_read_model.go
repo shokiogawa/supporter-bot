@@ -1,6 +1,11 @@
 package read_model
 
-type CostSumMonthReadModel struct {
+type CostSumReamModel struct {
 	OutCome int
 	Date    string
+}
+
+type CostSumListReadModel struct {
+	LineUserId  string
+	CostSumList []CostSumReamModel
 }
