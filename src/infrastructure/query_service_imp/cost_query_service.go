@@ -23,16 +23,18 @@ type ReceiveUserId struct {
 }
 
 type ReceiveCost struct {
-	Title   string `db:"title"`
-	OutCome int    `db:"outcome"`
+	Title      string `db:"title"`
+	OutCome    int    `db:"outcome"`
+	LineUserId string `dc:"line_user_id"`
 }
 
 type ReceiveSumCost struct {
-	OutCome int    `db:"SUM(outcome)"`
-	Date    string `db:"date"`
+	LineUserId string `db:"line_user_id"`
+	OutCome    int    `db:"outcome"`
+	Date       string `db:"date"`
 }
 
-func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_model.CostSumMonthReadModel, err error) {
+func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_model.CostSumReamModel, err error) {
 	db, err := qs.database.Connect()
 	if err != nil {
 		return
@@ -47,7 +49,7 @@ func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_m
 	today := time.Now()
 	firstDate := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, time.Local)
 	lastDate := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, -1)
-	query = `SELECT SUM(outcome),DATE_FORMAT(created_at, '%Y年%m月%d日') as date FROM costs WHERE user_id = ? AND created_at BETWEEN ? AND ? GROUP BY DATE_FORMAT(created_at, '%Y年%m月%d日');`
+	query = `SELECT SUM(outcome) as outcome,DATE_FORMAT(created_at, '%Y年%m月%d日') as date FROM costs WHERE user_id = ? AND created_at BETWEEN ? AND ? GROUP BY DATE_FORMAT(created_at, '%Y年%m月%d日');`
 	var receiveSumCosts []ReceiveSumCost
 	err = db.Select(&receiveSumCosts, query, receiceUserIdVar.Id, firstDate, lastDate)
 	if err != nil {
@@ -55,7 +57,7 @@ func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_m
 		return
 	}
 	for _, cost := range receiveSumCosts {
-		readModel = append(readModel, read_model.CostSumMonthReadModel{
+		readModel = append(readModel, read_model.CostSumReamModel{
 			OutCome: cost.OutCome,
 			Date:    cost.Date,
 		})
@@ -91,6 +93,36 @@ func (qs *CostQueryService) FetchPerDay(lineUserId string) (listCost []entity.Co
 		listCost = append(listCost, entity.Cost{
 			Title:   cost.Title,
 			OutCome: cost.OutCome,
+		})
+	}
+	return
+}
+
+// FetchPerMonthList 今月の支出を前ユーザーに送信する
+func (qs *CostQueryService) FetchPerMonthList() (readModel []read_model.CostSumListReadModel, err error) {
+	db, err := qs.database.Connect()
+	if err != nil {
+		return
+	}
+	today := time.Now()
+	firstDate := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, time.Local)
+	lastDate := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, -1)
+	//usersテーブルを軸にデータを抽出(1度も支出を保存していない人は今月の支出は0円であることを伝えるため。)
+	query := `SELECT users.line_user_id as line_user_id, SUM(costs.outcome) as outcome ,DATE_FORMAT(costs.created_at, '%Y年%m月%d日') as date FROM users LEFT OUTER JOIN costs ON users.id = costs.user_id WHERE costs.created_at BETWEEN ? AND ? GROUP BY users.line_user_id, DATE_FORMAT(costs.created_at, '%Y年%m月%d日');`
+	var receiveSumCosts []ReceiveSumCost
+	err = db.Select(&receiveSumCosts, query, firstDate, lastDate)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	costsMap := make(map[string][]read_model.CostSumReamModel)
+	for _, cost := range receiveSumCosts {
+		costsMap[cost.LineUserId] = append(costsMap[cost.LineUserId], read_model.CostSumReamModel{OutCome: cost.OutCome, Date: cost.Date})
+	}
+	for key, value := range costsMap {
+		readModel = append(readModel, read_model.CostSumListReadModel{
+			LineUserId:  key,
+			CostSumList: value,
 		})
 	}
 	return
