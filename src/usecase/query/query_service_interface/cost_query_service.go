@@ -7,6 +7,5 @@ import (
 
 type CostQueryService interface {
 	FetchPerDay(lineUserId string) (listCost []entity.Cost, err error)
-	FetchPerMonth(lineUserId string) (readModel []read_model.CostSumReamModel, err error)
-	FetchPerMonthList() (readModel []read_model.CostSumListReadModel, err error)
+	FetchPerMonth(lineUserId string) (readModel []read_model.CostSumMonthReadModel, err error)
 }
