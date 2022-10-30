@@ -15,7 +15,7 @@ func main() {
 	e := NewRouter(init)
 
 	env := os.Getenv("ENV")
-	if env == "Develop" {
+	if env == "Develop" || env == "AWS-Prod" {
 		e.Logger.Fatal(e.Start(":80"))
 	} else {
 		e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
