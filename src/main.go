@@ -1,16 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"github.com/jmoiron/sqlx"
+	"github.com/labstack/gommon/log"
 	"os"
 )
 
 func main() {
-	fmt.Println("go app running...")
 	init, err := NewInitialize()
 	if err != nil {
-		return
+		log.Fatal("can not initialize app")
 	}
+	defer func(Db *sqlx.DB) {
+		err := Db.Close()
+		if err != nil {
+		}
+	}(init.database.DB)
 	//ルーターセッテイング
 	e := NewRouter(init)
 

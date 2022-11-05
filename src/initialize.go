@@ -12,6 +12,7 @@ import (
 type Initialize struct {
 	lineHandler *line.LineHandler
 	lineBatch   *line.LineBatch
+	database    *infrastructure.Database
 }
 
 func NewInitialize() (init *Initialize, err error) {
@@ -23,11 +24,11 @@ func NewInitialize() (init *Initialize, err error) {
 	weatherController := controller.NewWeatherController(weatherQueryService, lineBot)
 
 	//Handler関連
-	database, err := infrastructure.NewDatabase()
-	costRepository := repository_imp.NewCostRepository(database)
-	userRepository := repository_imp.NewUserRepository(database)
+	init.database, err = infrastructure.NewDatabase()
+	costRepository := repository_imp.NewCostRepository(init.database)
+	userRepository := repository_imp.NewUserRepository(init.database)
 
-	costQueryService := query_service_imp.NewCostQueryService(database)
+	costQueryService := query_service_imp.NewCostQueryService(init.database)
 	restaurantQueryService := query_service_imp.NewFetchRestaurantQueryService()
 
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
