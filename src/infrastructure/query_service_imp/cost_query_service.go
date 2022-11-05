@@ -23,9 +23,10 @@ type ReceiveUserId struct {
 }
 
 type ReceiveCost struct {
-	Title      string `db:"title"`
-	OutCome    int    `db:"outcome"`
-	LineUserId string `dc:"line_user_id"`
+	Id           int    `db:"id"`
+	PublicCostId string `db:"public_cost_id"`
+	Title        string `db:"title"`
+	OutCome      int    `db:"outcome"`
 }
 
 type ReceiveSumCost struct {
@@ -82,7 +83,7 @@ func (qs *CostQueryService) FetchPerDay(lineUserId string) (listCost []entity.Co
 	firstDateTime := time.Date(today.Year(), today.Month(), today.Day(), 00, 00, 00, 00, time.Local)
 	lastDateTime := time.Date(today.Year(), today.Month(), today.Day(), 23, 59, 59, 00, time.Local)
 
-	query = `SELECT title, outcome FROM costs WHERE user_id = ? AND created_at BETWEEN ? AND ?`
+	query = `SELECT id, public_cost_id, title, outcome FROM costs WHERE user_id = ? AND created_at BETWEEN ? AND ?`
 	var receiveVars []ReceiveCost
 	err = db.Select(&receiveVars, query, receiceUserIdVar.Id, firstDateTime, lastDateTime)
 	if err != nil {

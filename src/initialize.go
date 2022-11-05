@@ -4,15 +4,18 @@ import (
 	"household.api/src/infrastructure"
 	"household.api/src/infrastructure/query_service_imp"
 	"household.api/src/infrastructure/repository_imp"
+	"household.api/src/presentation/front"
+	"household.api/src/presentation/front/front_controller"
 	"household.api/src/presentation/line"
-	"household.api/src/presentation/line/controller"
+	"household.api/src/presentation/line/line_controller"
 	"household.api/src/usecase/command"
 )
 
 type Initialize struct {
-	lineHandler *line.LineHandler
-	lineBatch   *line.LineBatch
-	database    *infrastructure.Database
+	lineHandler  *line.LineHandler
+	lineBatch    *line.LineBatch
+	frontHandler *front.Handler
+	database     *infrastructure.Database
 }
 
 func NewInitialize() (init *Initialize, err error) {
@@ -21,7 +24,7 @@ func NewInitialize() (init *Initialize, err error) {
 	lineBot, err := line.LineInit()
 	//Batch関連
 	weatherQueryService := query_service_imp.NewFetchWeatherQueryService()
-	weatherController := controller.NewWeatherController(weatherQueryService, lineBot)
+	weatherController := line_controller.NewWeatherController(weatherQueryService, lineBot)
 
 	//Handler関連
 	init.database, err = infrastructure.NewDatabase()
@@ -34,17 +37,23 @@ func NewInitialize() (init *Initialize, err error) {
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
 	saveUserUseCase := command.NewSaveUserUseCase(userRepository)
 
-	costController := controller.NewCostController(*saveCostUsecase, costQueryService)
-	userController := controller.NewUserController(*saveUserUseCase)
-	restaurantController := controller.NewRestaurantController(restaurantQueryService)
+	//line controller
+	costController := line_controller.NewCostController(*saveCostUsecase, costQueryService)
+	userController := line_controller.NewUserController(*saveUserUseCase)
+	restaurantController := line_controller.NewRestaurantController(restaurantQueryService)
 
-	handler, err := line.NewLineHandler(lineBot, costController, weatherController, userController, restaurantController)
+	//front controller
+	frontCostController := front_controller.NewCostController(*saveCostUsecase, costQueryService)
+
+	frontHandler := front.NewHandler(frontCostController)
+	lineHandler, err := line.NewLineHandler(lineBot, costController, weatherController, userController, restaurantController)
 	batch := line.NewLineBatch(lineBot, *weatherController, *costController)
 	if err != nil {
 		return
 	}
 
 	init.lineBatch = batch
-	init.lineHandler = handler
+	init.lineHandler = lineHandler
+	init.frontHandler = frontHandler
 	return
 }

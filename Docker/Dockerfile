@@ -37,3 +37,12 @@
 #COPY --from=builder /go/household/binary /go/household/production
 #ENV PORT=${PORT}
 #CMD ["/go/household/production/binary"]
+
+FROM golang:1.18.4-alpine
+WORKDIR /go/household/
+COPY tools ./tools
+RUN apk update && apk --no-cache add git
+RUN go install github.com/rubenv/sql-migrate/...@latest
+WORKDIR /go/household/tools
+CMD ["sql-migrate", "up"]
+EXPOSE 80

@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"household.api/src/presentation/line/controller"
+	"household.api/src/presentation/line/line_controller"
 )
 
 type LineBatch struct {
 	bot               *linebot.Client
-	weatherController controller.WeatherController
-	costController    controller.CostController
+	weatherController line_controller.WeatherController
+	costController    line_controller.CostController
 }
 
-func NewLineBatch(bot *linebot.Client, weatherController controller.WeatherController, costController controller.CostController) *LineBatch {
+func NewLineBatch(bot *linebot.Client, weatherController line_controller.WeatherController, costController line_controller.CostController) *LineBatch {
 	batch := new(LineBatch)
 	batch.bot = bot
 	batch.weatherController = weatherController

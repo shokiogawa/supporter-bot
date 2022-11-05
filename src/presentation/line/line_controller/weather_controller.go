@@ -1,4 +1,4 @@
-package controller
+package line_controller
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 type WeatherController struct {
 	fetchWeatherQueryService query_service_interface.FetchWeatherQueryService
-	linebot *linebot.Client
+	linebot                  *linebot.Client
 }
 
 func NewWeatherController(fetchWeatherQueryService query_service_interface.FetchWeatherQueryService, linebot *linebot.Client) *WeatherController {
@@ -18,9 +18,9 @@ func NewWeatherController(fetchWeatherQueryService query_service_interface.Fetch
 	return controller
 }
 
-func (con *WeatherController) GetWeather()(replyMessage string,err error){
+func (con *WeatherController) GetWeather() (replyMessage string, err error) {
 	weather, err := con.fetchWeatherQueryService.Invoke()
-	if err != nil{
+	if err != nil {
 		return
 	}
 

@@ -1,4 +1,4 @@
-package controller
+package line_controller
 
 import (
 	"fmt"

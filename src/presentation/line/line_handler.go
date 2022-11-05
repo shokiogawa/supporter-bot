@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"household.api/src/presentation/line/controller"
+	"household.api/src/presentation/line/line_controller"
 	"strconv"
 	"strings"
 )
@@ -12,13 +12,13 @@ import (
 //LineHandler ルーターのような役割(どのコントローラーを使用するもの)
 type LineHandler struct {
 	bot                  *linebot.Client
-	costController       *controller.CostController
-	userController       *controller.UserController
-	weatherController    *controller.WeatherController
-	restaurantController *controller.RestaurantController
+	costController       *line_controller.CostController
+	userController       *line_controller.UserController
+	weatherController    *line_controller.WeatherController
+	restaurantController *line_controller.RestaurantController
 }
 
-func NewLineHandler(bot *linebot.Client, costController *controller.CostController, weatherController *controller.WeatherController, userController *controller.UserController, restaurantController *controller.RestaurantController) (lineHandler *LineHandler, err error) {
+func NewLineHandler(bot *linebot.Client, costController *line_controller.CostController, weatherController *line_controller.WeatherController, userController *line_controller.UserController, restaurantController *line_controller.RestaurantController) (lineHandler *LineHandler, err error) {
 	lineHandler = new(LineHandler)
 	lineHandler.bot = bot
 	lineHandler.costController = costController
