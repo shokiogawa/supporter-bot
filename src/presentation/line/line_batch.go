@@ -39,7 +39,6 @@ func (batch *LineBatch) GetOutComePerMonth(e echo.Context) (err error) {
 		return
 	}
 	for key, value := range replyMessages {
-		fmt.Println(value)
 		if _, err := batch.bot.PushMessage(key, linebot.NewTextMessage(value)).Do(); err != nil {
 		}
 	}
