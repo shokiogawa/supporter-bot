@@ -1,0 +1,15 @@
+
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS fixed_costs(
+    id MEDIUMINT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    public_fixed_cost_id VARCHAR(1024) NOT NULL,
+    user_id MEDIUMINT NOT NULL ,
+    name VARCHAR(64) NOT NULL ,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+-- +migrate Down
+
+DROP TABLE IF EXISTS fixed_costs;
