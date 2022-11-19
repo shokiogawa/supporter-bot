@@ -35,14 +35,14 @@ type ReceiveSumCost struct {
 	Date       string `db:"date"`
 }
 
-func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_model.CostSumReamModel, err error) {
+func (qs *CostQueryService) FetchPerMonth(publicUserId string) (readModel []read_model.CostSumReamModel, err error) {
 	db, err := qs.database.Connect()
 	if err != nil {
 		return
 	}
-	query := `SELECT id FROM users WHERE line_user_id = ?`
+	query := `SELECT id FROM users WHERE public_user_id = ?`
 	var receiceUserIdVar ReceiveUserId
-	err = db.Get(&receiceUserIdVar, query, lineUserId)
+	err = db.Get(&receiceUserIdVar, query, publicUserId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -66,14 +66,14 @@ func (qs *CostQueryService) FetchPerMonth(lineUserId string) (readModel []read_m
 	return
 }
 
-func (qs *CostQueryService) FetchPerDay(lineUserId string) (listCost []entity.Cost, err error) {
+func (qs *CostQueryService) FetchPerDay(publicUserId string) (listCost []entity.Cost, err error) {
 	db, err := qs.database.Connect()
 	if err != nil {
 		return
 	}
-	query := `SELECT id FROM users WHERE line_user_id = ?`
+	query := `SELECT id FROM users WHERE public_user_id = ?`
 	var receiceUserIdVar ReceiveUserId
-	err = db.Get(&receiceUserIdVar, query, lineUserId)
+	err = db.Get(&receiceUserIdVar, query, publicUserId)
 	if err != nil {
 		fmt.Println(err)
 		return

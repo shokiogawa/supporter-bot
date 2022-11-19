@@ -1,7 +1,7 @@
 package repository_imp
 
 import (
-	"fmt"
+	"errors"
 	"household.api/src/domain/entity"
 	"household.api/src/infrastructure"
 )
@@ -16,19 +16,29 @@ func NewFixedCostRepository(database *infrastructure.Database) *FixedCostReposit
 	return repo
 }
 
-func (repo *FixedCostRepository) Save(cost *entity.Cost) {
+func (repo *FixedCostRepository) Save(fixedCost *entity.FixedCost) (err error) {
 	db, err := repo.database.Connect()
 	if err != nil {
 		return
 	}
 
 	//line_user_idより、user_idを取得
-	query := `SELECT id FROM users WHERE line_user_id = ?`
+	query := `SELECT id FROM users WHERE public_user_id = ?`
 	var receiveVar ReceiveUserId
-	err = db.Get(&receiveVar, query, cost.UserLineId)
+	err = db.Get(&receiveVar, query, fixedCost.PublicUserId)
 	if err != nil {
 		return
 	}
 	userId := uint32(receiveVar.Id)
-	fmt.Print(userId)
+
+	query = `INSERT INTO fixed_costs (public_fixed_cost_id, user_id, name) VALUE (?,?,?)`
+	result, err := db.MustExec(query, fixedCost.PublicFixedCostId, userId, fixedCost.Name).RowsAffected()
+	if err != nil {
+		return
+	}
+	if result == 0 {
+		err = errors.New("データが保存されていません。")
+		return
+	}
+	return
 }

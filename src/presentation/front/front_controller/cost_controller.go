@@ -22,8 +22,8 @@ func NewCostController(saveCostUseCase command.SaveCostUseCase, costQueryService
 }
 
 func (con *CostController) CostPerDay(e echo.Context) (err error) {
-	lineUserId := e.QueryParam("lineUserId")
-	costs, err := con.costQueryService.FetchPerDay(lineUserId)
+	publicUserId := e.QueryParam("publicUserId")
+	costs, err := con.costQueryService.FetchPerDay(publicUserId)
 	if err != nil {
 		log.Fatal(err)
 		e.Error(err)

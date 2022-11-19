@@ -5,6 +5,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"household.api/src/presentation/line/line_controller"
+	"household.api/src/usecase/query/query_service_interface"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -16,15 +18,23 @@ type LineHandler struct {
 	userController       *line_controller.UserController
 	weatherController    *line_controller.WeatherController
 	restaurantController *line_controller.RestaurantController
+	commonQueryService   query_service_interface.CommonQueryService
 }
 
-func NewLineHandler(bot *linebot.Client, costController *line_controller.CostController, weatherController *line_controller.WeatherController, userController *line_controller.UserController, restaurantController *line_controller.RestaurantController) (lineHandler *LineHandler, err error) {
+func NewLineHandler(
+	bot *linebot.Client,
+	costController *line_controller.CostController,
+	weatherController *line_controller.WeatherController,
+	userController *line_controller.UserController,
+	restaurantController *line_controller.RestaurantController,
+	commonQueryService query_service_interface.CommonQueryService) (lineHandler *LineHandler, err error) {
 	lineHandler = new(LineHandler)
 	lineHandler.bot = bot
 	lineHandler.costController = costController
 	lineHandler.weatherController = weatherController
 	lineHandler.userController = userController
 	lineHandler.restaurantController = restaurantController
+	lineHandler.commonQueryService = commonQueryService
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,6 +47,11 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 	events, err := handler.bot.ParseRequest(e.Request())
 	if err != nil {
 		return
+	}
+	//lineUserIdより、publicUserIdを取得
+	publicUserId, err := handler.commonQueryService.GetPublicUserId(events[0].Source.UserID)
+	if err != nil {
+		log.Fatal(err)
 	}
 	for _, event := range events {
 		switch event.Type {
@@ -54,11 +69,11 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 				} else if strings.Contains(receiveText, "ユーザー登録") {
 					replyMessage, err = handler.userController.SaveUser(event.Source.UserID)
 				} else if strings.Contains(receiveText, "今日の支出") {
-					replyMessage, err = handler.costController.CostPerDay(event.Source.UserID)
+					replyMessage, err = handler.costController.CostPerDay(publicUserId)
 				} else if strings.Contains(receiveText, "今月の支出") {
-					replyMessage, err = handler.costController.CostPerMonth(event.Source.UserID)
+					replyMessage, err = handler.costController.CostPerMonth(publicUserId)
 				} else if strings.Contains(receiveText, ":") {
-					replyMessage, err = handler.costController.SaveCost(message.Text, event.Source.UserID)
+					replyMessage, err = handler.costController.SaveCost(message.Text, publicUserId)
 				} else {
 					replyMessage = receiveText
 				}

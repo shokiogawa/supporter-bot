@@ -16,8 +16,8 @@ func NewSaveCostUseCase(costRepository repository_interface.CostRepository) *Sav
 	return usecase
 }
 
-func (usecase *SaveCostUseCase) Invoke(title string, outcome int, userLineId string) (err error) {
-	cost, err := entity.NewCost(title, outcome, userLineId)
+func (usecase *SaveCostUseCase) Invoke(title string, outcome int, publicUserId string) (err error) {
+	cost, err := entity.NewCost(title, outcome, publicUserId)
 	if err != nil {
 		return
 	}

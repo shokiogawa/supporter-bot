@@ -22,12 +22,12 @@ func NewCostController(saveCostUseCase command.SaveCostUseCase, costQueryService
 	return con
 }
 
-func (con *CostController) SaveCost(message string, userId string) (replyMessage string, err error) {
+func (con *CostController) SaveCost(message string, publicUserId string) (replyMessage string, err error) {
 	content := strings.Split(message, ":")
 	title := content[0]
 	outcome, err := strconv.Atoi(content[1])
 
-	err = con.saveCostUseCase.Invoke(title, outcome, userId)
+	err = con.saveCostUseCase.Invoke(title, outcome, publicUserId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -36,8 +36,8 @@ func (con *CostController) SaveCost(message string, userId string) (replyMessage
 	return
 }
 
-func (con *CostController) CostPerDay(lineUserId string) (replyMessage string, err error) {
-	costs, err := con.costQueryService.FetchPerDay(lineUserId)
+func (con *CostController) CostPerDay(publicUserId string) (replyMessage string, err error) {
+	costs, err := con.costQueryService.FetchPerDay(publicUserId)
 	replyMessage = "今日のこれまでの支出"
 	totalOutCome := 0
 	for _, cost := range costs {
@@ -49,8 +49,8 @@ func (con *CostController) CostPerDay(lineUserId string) (replyMessage string, e
 	return
 }
 
-func (con *CostController) CostPerMonth(lineUserId string) (replyMessage string, err error) {
-	costLists, err := con.costQueryService.FetchPerMonth(lineUserId)
+func (con *CostController) CostPerMonth(publicUserId string) (replyMessage string, err error) {
+	costLists, err := con.costQueryService.FetchPerMonth(publicUserId)
 	replyMessage = makeMessage(costLists)
 	return
 }

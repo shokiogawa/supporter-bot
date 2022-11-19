@@ -10,10 +10,10 @@ type Cost struct {
 	PublicCostId uuid.UUID
 	Title        string
 	OutCome      int
-	UserLineId   string
+	PublicUserId string
 }
 
-func NewCost(title string, outCome int, userId string) (cost *Cost, err error) {
+func NewCost(title string, outCome int, publicUserId string) (cost *Cost, err error) {
 	if title == "" || outCome == 0 {
 		err = errors.New("タイトルもしくは金額が入力されていません。")
 		return
@@ -22,6 +22,6 @@ func NewCost(title string, outCome int, userId string) (cost *Cost, err error) {
 	cost.PublicCostId = uuid.New()
 	cost.Title = title
 	cost.OutCome = outCome
-	cost.UserLineId = userId
+	cost.PublicUserId = publicUserId
 	return
 }

@@ -33,6 +33,7 @@ func NewInitialize() (init *Initialize, err error) {
 
 	costQueryService := query_service_imp.NewCostQueryService(init.database)
 	restaurantQueryService := query_service_imp.NewFetchRestaurantQueryService()
+	commonQueryService := query_service_imp.NewCommonQueryService(init.database)
 
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
 	saveUserUseCase := command.NewSaveUserUseCase(userRepository)
@@ -46,7 +47,13 @@ func NewInitialize() (init *Initialize, err error) {
 	frontCostController := front_controller.NewCostController(*saveCostUsecase, costQueryService)
 
 	frontHandler := front.NewHandler(frontCostController)
-	lineHandler, err := line.NewLineHandler(lineBot, costController, weatherController, userController, restaurantController)
+	lineHandler, err := line.NewLineHandler(
+		lineBot,
+		costController,
+		weatherController,
+		userController,
+		restaurantController,
+		commonQueryService)
 	batch := line.NewLineBatch(lineBot, *weatherController, *costController)
 	if err != nil {
 		return

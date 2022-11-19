@@ -26,10 +26,10 @@ func (repo *CostRepository) Save(cost *entity.Cost) (err error) {
 		return
 	}
 
-	//line_user_idより、user_idを取得
-	query := `SELECT id FROM users WHERE line_user_id = ?`
+	//public_user_idより、user_idを取得
+	query := `SELECT id FROM users WHERE public_user_id = ? LIMIT 1`
 	var receiveVar ReceiveUserId
-	err = db.Get(&receiveVar, query, cost.UserLineId)
+	err = db.Get(&receiveVar, query, cost.PublicUserId)
 	if err != nil {
 		return
 	}
