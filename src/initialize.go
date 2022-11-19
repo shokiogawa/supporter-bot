@@ -35,6 +35,7 @@ func NewInitialize() (init *Initialize, err error) {
 	costQueryService := query_service_imp.NewCostQueryService(init.database)
 	restaurantQueryService := query_service_imp.NewFetchRestaurantQueryService()
 	commonQueryService := query_service_imp.NewCommonQueryService(init.database)
+	fixedCostQueryService := query_service_imp.NewFixedCostQueryService(init.database)
 
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
 	saveUserUseCase := command.NewSaveUserUseCase(userRepository)
@@ -44,7 +45,7 @@ func NewInitialize() (init *Initialize, err error) {
 	costController := line_controller.NewCostController(*saveCostUsecase, costQueryService)
 	userController := line_controller.NewUserController(*saveUserUseCase)
 	restaurantController := line_controller.NewRestaurantController(restaurantQueryService)
-	fixedCostController := line_controller.NewFixedCostUseCase(saveFixedCostUseCase)
+	fixedCostController := line_controller.NewFixedCostUseCase(saveFixedCostUseCase, fixedCostQueryService)
 
 	//front controller
 	frontCostController := front_controller.NewCostController(*saveCostUsecase, costQueryService)

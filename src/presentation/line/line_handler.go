@@ -75,6 +75,8 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 					replyMessage, err = handler.costController.CostPerDay(publicUserId)
 				} else if strings.Contains(receiveText, "今月の支出") {
 					replyMessage, err = handler.costController.CostPerMonth(publicUserId)
+				} else if strings.Contains(receiveText, "現在の固定費") {
+					replyMessage, err = handler.fixedCostController.GetFixedCostList(publicUserId)
 				} else if strings.Contains(receiveText, "固定費:") {
 					//TOOD: 固定費に変更
 					replyMessage, err = handler.fixedCostController.SaveFixedCost(message.Text, publicUserId)
@@ -86,7 +88,7 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 				//ここもどうにかわかりやすいように変更予定
 				_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
-					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do()
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("エラーが発生しました。管理者にお問合せください。")).Do()
 					log.Fatal(err)
 					if err != nil {
 						log.Fatal(err)
