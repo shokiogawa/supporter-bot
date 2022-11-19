@@ -52,25 +52,24 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 		return
 	}
 	//lineUserIdより、publicUserIdを取得
-	publicUserId, err := handler.commonQueryService.GetPublicUserId(events[0].Source.UserID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, event := range events {
 		switch event.Type {
-		//友達追加時
 		case linebot.EventTypeFollow:
+			replyMessage, err = handler.userController.SaveUser(event.Source.UserID)
 		//テキスト送信時
 		case linebot.EventTypeMessage:
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				receiveText := message.Text
+				//userid取得
+				publicUserId, err := handler.commonQueryService.GetPublicUserId(event.Source.UserID)
 				//天気
 				if strings.Contains(receiveText, "天気") {
 					replyMessage, err = handler.weatherController.GetWeather()
 					//その他(金額)
-				} else if strings.Contains(receiveText, "ユーザー登録") {
-					replyMessage, err = handler.userController.SaveUser(event.Source.UserID)
 				} else if strings.Contains(receiveText, "今日の支出") {
 					replyMessage, err = handler.costController.CostPerDay(publicUserId)
 				} else if strings.Contains(receiveText, "今月の支出") {
