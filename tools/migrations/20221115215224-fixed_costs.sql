@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS fixed_costs(
     public_fixed_cost_id VARCHAR(1024) NOT NULL,
     user_id MEDIUMINT NOT NULL ,
     name VARCHAR(64) NOT NULL ,
+    outcome INT NOT NULL ,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)

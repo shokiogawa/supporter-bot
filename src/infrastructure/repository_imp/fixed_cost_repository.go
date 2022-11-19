@@ -31,8 +31,9 @@ func (repo *FixedCostRepository) Save(fixedCost *entity.FixedCost) (err error) {
 	}
 	userId := uint32(receiveVar.Id)
 
-	query = `INSERT INTO fixed_costs (public_fixed_cost_id, user_id, name) VALUE (?,?,?)`
-	result, err := db.MustExec(query, fixedCost.PublicFixedCostId, userId, fixedCost.Name).RowsAffected()
+	query = `INSERT INTO fixed_costs (public_fixed_cost_id, user_id, name, outcome) VALUE (?,?,?,?)
+    `
+	result, err := db.MustExec(query, fixedCost.PublicFixedCostId, userId, fixedCost.Name, fixedCost.OutCome).RowsAffected()
 	if err != nil {
 		return
 	}

@@ -18,6 +18,7 @@ type LineHandler struct {
 	userController       *line_controller.UserController
 	weatherController    *line_controller.WeatherController
 	restaurantController *line_controller.RestaurantController
+	fixedCostController  *line_controller.FixedCostController
 	commonQueryService   query_service_interface.CommonQueryService
 }
 
@@ -27,6 +28,7 @@ func NewLineHandler(
 	weatherController *line_controller.WeatherController,
 	userController *line_controller.UserController,
 	restaurantController *line_controller.RestaurantController,
+	fixedCostController *line_controller.FixedCostController,
 	commonQueryService query_service_interface.CommonQueryService) (lineHandler *LineHandler, err error) {
 	lineHandler = new(LineHandler)
 	lineHandler.bot = bot
@@ -34,6 +36,7 @@ func NewLineHandler(
 	lineHandler.weatherController = weatherController
 	lineHandler.userController = userController
 	lineHandler.restaurantController = restaurantController
+	lineHandler.fixedCostController = fixedCostController
 	lineHandler.commonQueryService = commonQueryService
 	if err != nil {
 		fmt.Println(err)
@@ -72,6 +75,9 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 					replyMessage, err = handler.costController.CostPerDay(publicUserId)
 				} else if strings.Contains(receiveText, "今月の支出") {
 					replyMessage, err = handler.costController.CostPerMonth(publicUserId)
+				} else if strings.Contains(receiveText, "固定費:") {
+					//TOOD: 固定費に変更
+					replyMessage, err = handler.fixedCostController.SaveFixedCost(message.Text, publicUserId)
 				} else if strings.Contains(receiveText, ":") {
 					replyMessage, err = handler.costController.SaveCost(message.Text, publicUserId)
 				} else {
@@ -81,8 +87,9 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 				_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
 					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do()
+					log.Fatal(err)
 					if err != nil {
-						fmt.Println(err)
+						log.Fatal(err)
 					}
 				}
 			case *linebot.LocationMessage:

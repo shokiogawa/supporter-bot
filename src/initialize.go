@@ -30,6 +30,7 @@ func NewInitialize() (init *Initialize, err error) {
 	init.database, err = infrastructure.NewDatabase()
 	costRepository := repository_imp.NewCostRepository(init.database)
 	userRepository := repository_imp.NewUserRepository(init.database)
+	fixedCostRepository := repository_imp.NewFixedCostRepository(init.database)
 
 	costQueryService := query_service_imp.NewCostQueryService(init.database)
 	restaurantQueryService := query_service_imp.NewFetchRestaurantQueryService()
@@ -37,11 +38,13 @@ func NewInitialize() (init *Initialize, err error) {
 
 	saveCostUsecase := command.NewSaveCostUseCase(costRepository)
 	saveUserUseCase := command.NewSaveUserUseCase(userRepository)
+	saveFixedCostUseCase := command.NewSaveFixedCostUseCase(fixedCostRepository)
 
 	//line controller
 	costController := line_controller.NewCostController(*saveCostUsecase, costQueryService)
 	userController := line_controller.NewUserController(*saveUserUseCase)
 	restaurantController := line_controller.NewRestaurantController(restaurantQueryService)
+	fixedCostController := line_controller.NewFixedCostUseCase(saveFixedCostUseCase)
 
 	//front controller
 	frontCostController := front_controller.NewCostController(*saveCostUsecase, costQueryService)
@@ -53,6 +56,7 @@ func NewInitialize() (init *Initialize, err error) {
 		weatherController,
 		userController,
 		restaurantController,
+		fixedCostController,
 		commonQueryService)
 	batch := line.NewLineBatch(lineBot, *weatherController, *costController)
 	if err != nil {
