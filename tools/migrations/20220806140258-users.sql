@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users(
     update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ALTER TABLE users ADD INDEX index1(line_user_id);
+ALTER TABLE users ADD INDEX index2(public_user_id);
 -- +migrate Down
 
 DROP TABLE IF EXISTS users;
