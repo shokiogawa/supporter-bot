@@ -42,7 +42,7 @@ func NewInitialize() (init *Initialize, err error) {
 	saveFixedCostUseCase := command.NewSaveFixedCostUseCase(fixedCostRepository)
 
 	//line controller
-	costController := line_controller.NewCostController(*saveCostUsecase, costQueryService)
+	costController := line_controller.NewCostController(*saveCostUsecase, costQueryService, lineBot)
 	userController := line_controller.NewUserController(*saveUserUseCase)
 	restaurantController := line_controller.NewRestaurantController(restaurantQueryService)
 	fixedCostController := line_controller.NewFixedCostUseCase(saveFixedCostUseCase, fixedCostQueryService)

@@ -57,8 +57,12 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 	}
 	for _, event := range events {
 		switch event.Type {
+		//ユーザーがアカウントフォロー時
 		case linebot.EventTypeFollow:
 			replyMessage, err = handler.userController.SaveUser(event.Source.UserID)
+		case linebot.EventTypePostback:
+			test := event.Postback.Data
+			fmt.Println(test)
 		//テキスト送信時
 		case linebot.EventTypeMessage:
 			switch message := event.Message.(type) {
@@ -69,23 +73,29 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 				//天気
 				if strings.Contains(receiveText, "天気") {
 					replyMessage, err = handler.weatherController.GetWeather()
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 					//その他(金額)
 				} else if strings.Contains(receiveText, "今日の支出") {
 					replyMessage, err = handler.costController.CostPerDay(publicUserId)
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				} else if strings.Contains(receiveText, "今月の支出") {
 					replyMessage, err = handler.costController.CostPerMonth(publicUserId)
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				} else if strings.Contains(receiveText, "現在の固定費") {
 					replyMessage, err = handler.fixedCostController.GetFixedCostList(publicUserId)
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				} else if strings.Contains(receiveText, "固定費:") {
 					//TOOD: 固定費に変更
 					replyMessage, err = handler.fixedCostController.SaveFixedCost(message.Text, publicUserId)
+					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				} else if strings.Contains(receiveText, ":") {
-					replyMessage, err = handler.costController.SaveCost(message.Text, publicUserId)
+					//支出保存
+					replyMessage, err = handler.costController.SaveCost(message.Text, publicUserId, event.ReplyToken, event.Source.UserID)
 				} else {
 					replyMessage = receiveText
 				}
 				//ここもどうにかわかりやすいように変更予定
-				_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+				//_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
 					_, err = handler.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("エラーが発生しました。管理者にお問合せください。")).Do()
 					log.Fatal(err)

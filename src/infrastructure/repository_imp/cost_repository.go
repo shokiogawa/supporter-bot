@@ -20,7 +20,7 @@ type ReceiveUserId struct {
 	Id int `db:"id"`
 }
 
-func (repo *CostRepository) Save(cost *entity.Cost) (err error) {
+func (repo *CostRepository) Save(cost *entity.Cost) (costId uint32, err error) {
 	db, err := repo.database.Connect()
 	if err != nil {
 		return
@@ -37,11 +37,12 @@ func (repo *CostRepository) Save(cost *entity.Cost) (err error) {
 
 	query = `INSERT INTO costs (public_cost_id, user_id, title, outcome) VALUE (?,?,?,?)`
 	result := db.MustExec(query, cost.PublicCostId, userId, cost.Title, cost.OutCome)
-	resultNum, err := result.RowsAffected()
+	resultNum, err := result.LastInsertId()
 	if resultNum == 0 {
 		fmt.Println("nothing affected")
 		return
 	}
+	costId = uint32(resultNum)
 	return
 
 }

@@ -2,9 +2,11 @@ package line_controller
 
 import (
 	"fmt"
+	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"household.api/src/usecase/command"
 	"household.api/src/usecase/query/query_service_interface"
 	"household.api/src/usecase/query/read_model"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -13,26 +15,56 @@ import (
 type CostController struct {
 	saveCostUseCase  command.SaveCostUseCase
 	costQueryService query_service_interface.CostQueryService
+	bot              *linebot.Client
 }
 
-func NewCostController(saveCostUseCase command.SaveCostUseCase, costQueryService query_service_interface.CostQueryService) *CostController {
+func NewCostController(
+	saveCostUseCase command.SaveCostUseCase,
+	costQueryService query_service_interface.CostQueryService,
+	bot *linebot.Client) *CostController {
 	con := new(CostController)
 	con.saveCostUseCase = saveCostUseCase
 	con.costQueryService = costQueryService
+	con.bot = bot
 	return con
 }
 
-func (con *CostController) SaveCost(message string, publicUserId string) (replyMessage string, err error) {
+func (con *CostController) SaveCost(message string, publicUserId string, replyToken string, lineUserId string) (replyMessage string, err error) {
 	content := strings.Split(message, ":")
 	title := content[0]
 	outcome, err := strconv.Atoi(content[1])
-
-	err = con.saveCostUseCase.Invoke(title, outcome, publicUserId)
+	costId, err := con.saveCostUseCase.Invoke(title, outcome, publicUserId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	//メッセージ
 	replyMessage = title + "を" + content[1] + "で登録しました。"
+	//ポストバックイベントデータ
+	data := fmt.Sprintf("type=%s&costId=%s", "delete", strconv.Itoa(int(costId)))
+	// 現在のデータ取得。
+	currentTime := time.Now().Format("2006年01月02日")
+	buttonTemp := linebot.NewButtonsTemplate(
+		"",
+		currentTime,
+		replyMessage,
+		linebot.NewPostbackAction("削除する。", data, "", "", "", ""))
+	resMessage := linebot.NewTemplateMessage("支出登録　", buttonTemp)
+	//LINEに送信
+	_, err = con.bot.ReplyMessage(replyToken, resMessage).Do()
+	if err != nil {
+		log.Fatal(err)
+		//上記のエラーの場合、lineUserIdよりpushメッセージで送信。
+		_, err = con.bot.PushMessage(lineUserId, resMessage).Do()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return
+}
+
+func (con *CostController) DeleteCost(publicUserId string) (err error) {
 	return
 }
 
