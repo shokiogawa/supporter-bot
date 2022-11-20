@@ -13,17 +13,20 @@ import (
 )
 
 type CostController struct {
-	saveCostUseCase  command.SaveCostUseCase
-	costQueryService query_service_interface.CostQueryService
-	bot              *linebot.Client
+	saveCostUseCase   *command.SaveCostUseCase
+	deleteCostUseCase *command.DeleteCostUseCase
+	costQueryService  query_service_interface.CostQueryService
+	bot               *linebot.Client
 }
 
 func NewCostController(
-	saveCostUseCase command.SaveCostUseCase,
+	saveCostUseCase *command.SaveCostUseCase,
+	deleteCostUseCase *command.DeleteCostUseCase,
 	costQueryService query_service_interface.CostQueryService,
 	bot *linebot.Client) *CostController {
 	con := new(CostController)
 	con.saveCostUseCase = saveCostUseCase
+	con.deleteCostUseCase = deleteCostUseCase
 	con.costQueryService = costQueryService
 	con.bot = bot
 	return con
@@ -64,7 +67,12 @@ func (con *CostController) SaveCost(message string, publicUserId string, replyTo
 	return
 }
 
-func (con *CostController) DeleteCost(publicUserId string) (err error) {
+func (con *CostController) DeleteCost(costId int, lineUserId string) (err error) {
+	err = con.deleteCostUseCase.Invoke(costId)
+	if err != nil {
+		return
+	}
+	_, err = con.bot.PushMessage(lineUserId, linebot.NewTextMessage("削除しました。")).Do()
 	return
 }
 

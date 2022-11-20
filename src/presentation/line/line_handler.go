@@ -61,8 +61,18 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 		case linebot.EventTypeFollow:
 			replyMessage, err = handler.userController.SaveUser(event.Source.UserID)
 		case linebot.EventTypePostback:
-			test := event.Postback.Data
-			fmt.Println(test)
+			data := event.Postback.Data
+			paramsMap := GetParamsMap(data)
+			if paramsMap["type"] == "delete" {
+				costId, err := strconv.Atoi(paramsMap["costId"])
+				if err != nil {
+					log.Fatal("costIdが文字列です。")
+				}
+				err = handler.costController.DeleteCost(costId, event.Source.UserID)
+				if err != nil {
+					log.Fatal("削除に失敗しました。")
+				}
+			}
 		//テキスト送信時
 		case linebot.EventTypeMessage:
 			switch message := event.Message.(type) {
@@ -128,6 +138,18 @@ func (handler *LineHandler) EventHandler(e echo.Context) (err error) {
 			}
 		}
 
+	}
+	return
+}
+
+func GetParamsMap(queryString string) (queryMap map[string]string) {
+	queryMap = make(map[string]string)
+	querys := strings.Split(queryString, "&")
+	for _, query := range querys {
+		keyAndValue := strings.Split(query, "=")
+		key := keyAndValue[0]
+		value := keyAndValue[1]
+		queryMap[key] = value
 	}
 	return
 }
